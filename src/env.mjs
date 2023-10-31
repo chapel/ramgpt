@@ -17,7 +17,7 @@ export const env = createEnv({
    */
   client: {
     // NEXT_PUBLIC_CLIENTVAR: z.string(),
-    NEXT_PUBLIC_OPENAI_API_KEY: z.string(),
+    NEXT_PUBLIC_OPENAI_API_KEY: z.string().min(1).optional(),
   },
 
   /**
