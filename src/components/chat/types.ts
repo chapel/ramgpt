@@ -8,4 +8,5 @@ export const enum MessageType {
 export interface MessageText {
   type: MessageType;
   text: string;
+  showTyping?: boolean;
 }

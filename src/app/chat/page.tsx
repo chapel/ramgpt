@@ -6,8 +6,9 @@ import { Messages } from "~/components/chat/messages";
 import { Header, HeaderName, SettingsButton } from "~/components/chat/header";
 import { Input } from "~/components/chat/input";
 import { Placeholder } from "~/components/placeholder";
+import { type MessageText, MessageType } from "~/components/chat/types";
 
-import { type MessageText, MessageType } from "../../components/chat/types";
+import { simple } from "./simple";
 
 export default function Chat() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
@@ -22,13 +23,22 @@ export default function Chat() {
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleMessageSubmit = (value: string) => {
+  const handleMessageSubmit = async (value: string) => {
     value = value.trim();
     if (value) {
       setMessages([
         ...messages,
         { type: MessageType.USER_MESSAGE, text: value },
       ]);
+
+      const history = messages.map((message) => message.text);
+      await simple(value, history).then((res) => {
+        setMessages([
+          ...messages,
+          { type: MessageType.USER_MESSAGE, text: value },
+          { type: MessageType.BOT_MESSAGE, text: res, showTyping: true },
+        ]);
+      });
     }
 
     setTimeout(() => {

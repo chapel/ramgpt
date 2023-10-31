@@ -2,6 +2,7 @@ import React, { forwardRef } from "react";
 
 import { type Props } from "~/components/types";
 import { type MessageText, MessageType } from "~/components/chat/types";
+import { TypeAnimation } from "react-type-animation";
 
 const MultiLineText = ({ text }: { text: string }) => {
   return (
@@ -18,7 +19,11 @@ const MultiLineText = ({ text }: { text: string }) => {
   );
 };
 
-export const BotMessage = ({ icon, children }: Props & { icon: string }) => {
+export const BotMessage = ({
+  icon,
+  children,
+  showTyping,
+}: Props & { icon: string; showTyping?: boolean }) => {
   return (
     <div className="flex items-end">
       <div className="order-2 mx-2 flex max-w-xl flex-col items-start space-y-2">
@@ -26,7 +31,21 @@ export const BotMessage = ({ icon, children }: Props & { icon: string }) => {
           return (
             <div>
               <span className="inline-block rounded-lg rounded-bl-none bg-gray-300 px-4 py-2 text-gray-600">
-                <MultiLineText text={child as string} />
+                {showTyping ? (
+                  <TypeAnimation
+                    cursor={false}
+                    sequence={[
+                      child as string,
+                      (el) =>
+                        el?.classList.remove("custom-type-animation-cursor"),
+                    ]}
+                    splitter={(text) => text.split(/(?= )/)}
+                    className="custom-type-animation-cursor whitespace-pre-line"
+                    speed={10}
+                  />
+                ) : (
+                  <MultiLineText text={child as string} />
+                )}
               </span>
             </div>
           );
@@ -58,11 +77,23 @@ export const UserMessage = ({ children }: Props) => {
 export const Message = ({ message }: { message: MessageText }) => {
   switch (message.type) {
     case MessageType.BOT_THOUGHT:
-      return <BotMessage icon="💭">{message.text}</BotMessage>;
+      return (
+        <BotMessage icon="💭" showTyping={message.showTyping}>
+          {message.text}
+        </BotMessage>
+      );
     case MessageType.BOT_FUNCTION:
-      return <BotMessage icon="⚡">{message.text}</BotMessage>;
+      return (
+        <BotMessage icon="⚡" showTyping={message.showTyping}>
+          {message.text}
+        </BotMessage>
+      );
     case MessageType.BOT_MESSAGE:
-      return <BotMessage icon="🤖">{message.text}</BotMessage>;
+      return (
+        <BotMessage icon="🤖" showTyping={message.showTyping}>
+          {message.text}
+        </BotMessage>
+      );
     case MessageType.USER_MESSAGE:
       return <UserMessage>{message.text}</UserMessage>;
   }
