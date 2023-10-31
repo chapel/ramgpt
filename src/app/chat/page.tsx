@@ -6,10 +6,10 @@ import { Messages } from "~/components/chat/messages";
 import { Header, HeaderName, SettingsButton } from "~/components/chat/header";
 import { Input } from "~/components/chat/input";
 import { Placeholder } from "~/components/placeholder";
-import { type MessageText, MessageType } from "~/components/chat/types";
+import { MessageType } from "~/components/chat/types";
 
 import { simple } from "./simple";
-import { messagesAtom, loadingResultAtom, inputAtom } from "./state";
+import { messagesAtom, loadingResultAtom } from "./state";
 import { useAtom, useSetAtom } from "jotai";
 
 export default function Chat() {
