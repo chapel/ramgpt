@@ -39,7 +39,7 @@ export const BotMessage = ({
                       (el) =>
                         el?.classList.remove("custom-type-animation-cursor"),
                     ]}
-                    splitter={(text) => text.split(/(?= )/)}
+                    splitter={(text) => text.split(/(?= |\n)/)}
                     className="custom-type-animation-cursor whitespace-pre-line"
                     speed={10}
                   />
@@ -102,15 +102,12 @@ export const Message = ({ message }: { message: MessageText }) => {
 interface MessagesProps {
   messages: MessageText[];
 }
-export const Messages = forwardRef<HTMLDivElement, MessagesProps>(
-  function Messages({ messages }: MessagesProps, ref) {
-    return (
-      <div className="mt-auto flex flex-1 flex-col justify-end space-y-4 overflow-y-auto p-3 text-sm">
-        {messages.map((message: MessageText, idx: number) => {
-          return <Message message={message} key={idx} />;
-        })}
-        <div className="flex" ref={ref} />
-      </div>
-    );
-  },
-);
+export const Messages = ({ messages }: MessagesProps) => {
+  return (
+    <div className="mt-auto flex flex-1 flex-col justify-end space-y-4 p-3 text-sm">
+      {messages.map((message: MessageText, idx: number) => {
+        return <Message message={message} key={idx} />;
+      })}
+    </div>
+  );
+};

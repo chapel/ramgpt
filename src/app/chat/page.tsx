@@ -9,46 +9,33 @@ import { Placeholder } from "~/components/placeholder";
 import { type MessageText, MessageType } from "~/components/chat/types";
 
 import { simple } from "./simple";
+import { messagesAtom, loadingResultAtom, inputAtom } from "./state";
+import { useAtom, useSetAtom } from "jotai";
 
 export default function Chat() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
-  const [messages, setMessages] = useState<MessageText[]>([
-    { type: MessageType.BOT_THOUGHT, text: "This is a bot thought!" },
-    {
-      type: MessageType.BOT_FUNCTION,
-      text: "This is a bot function!",
-    },
-    { type: MessageType.BOT_MESSAGE, text: "This is a bot message!" },
-  ]);
+  const [messages, setMessages] = useAtom(messagesAtom);
+  const setLoadingResult = useSetAtom(loadingResultAtom);
+
   const messagesContainerRef = useRef<HTMLDivElement>(null);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleMessageSubmit = async (value: string) => {
     value = value.trim();
     if (value) {
-      setMessages([
+      setMessages((messages) => [
         ...messages,
         { type: MessageType.USER_MESSAGE, text: value },
       ]);
 
+      setLoadingResult(true);
       const history = messages.map((message) => message.text);
-      await simple(value, history).then((res) => {
-        setMessages([
-          ...messages,
-          { type: MessageType.USER_MESSAGE, text: value },
-          { type: MessageType.BOT_MESSAGE, text: res, showTyping: true },
-        ]);
-      });
+      const res = await simple(value, history);
+      setMessages((messages) => [
+        ...messages,
+        { type: MessageType.BOT_MESSAGE, text: res, showTyping: true },
+      ]);
+      setLoadingResult(false);
     }
-
-    setTimeout(() => {
-      if (messagesEndRef.current && messagesContainerRef.current) {
-        messagesContainerRef.current.scroll({
-          top: messagesEndRef.current.offsetTop,
-          behavior: "smooth",
-        });
-      }
-    }, 1);
   };
 
   const handleSettingsClick = () => {
@@ -64,10 +51,10 @@ export default function Chat() {
             <SettingsButton onClick={handleSettingsClick} />
           </Header>
           <div
-            className="flex flex-1 overflow-y-auto"
+            className="flex flex-1 flex-col-reverse overflow-y-auto"
             ref={messagesContainerRef}
           >
-            <Messages messages={messages} ref={messagesEndRef} />
+            <Messages messages={messages} />
           </div>
           <Input onMessageSubmit={handleMessageSubmit} />
         </div>
