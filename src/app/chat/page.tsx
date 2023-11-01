@@ -43,15 +43,15 @@ export default function Chat() {
   };
 
   return (
-    <div className="mx-auto flex w-full max-w-7xl items-start gap-x-8 px-4 py-10 pt-0 sm:px-6 lg:px-8">
+    <div className="mx-auto flex w-full max-w-7xl items-start gap-x-8 px-4 py-0 sm:px-6 lg:px-8">
       <main className="flex-1">
-        <div className="p:2 flex h-[calc(100vh-6rem)] flex-1 flex-col justify-between">
+        <div className="p:2 flex h-screen flex-1 flex-col justify-between pb-4">
           <Header>
             <HeaderName>Bot</HeaderName>
             <SettingsButton onClick={handleSettingsClick} />
           </Header>
           <div
-            className="flex flex-1 flex-col-reverse overflow-y-auto"
+            className="max-w-screen flex flex-1 flex-col-reverse overflow-y-auto"
             ref={messagesContainerRef}
           >
             <Messages messages={messages} />

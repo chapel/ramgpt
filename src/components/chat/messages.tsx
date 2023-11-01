@@ -1,23 +1,8 @@
-import React, { forwardRef } from "react";
+import React from "react";
 
 import { type Props } from "~/components/types";
 import { type MessageText, MessageType } from "~/components/chat/types";
 import { TypeAnimation } from "react-type-animation";
-
-const MultiLineText = ({ text }: { text: string }) => {
-  return (
-    <>
-      {text.split("\n").map((line: string, idx: number) => {
-        return (
-          <div key={idx}>
-            {line}
-            <br />
-          </div>
-        );
-      })}
-    </>
-  );
-};
 
 export const BotMessage = ({
   icon,
@@ -30,7 +15,7 @@ export const BotMessage = ({
         {React.Children.map(children, (child: React.ReactNode) => {
           return (
             <div>
-              <span className="inline-block rounded-lg rounded-bl-none bg-gray-300 px-4 py-2 text-gray-600">
+              <span className="inline-block whitespace-pre-wrap break-words rounded-lg rounded-bl-none bg-gray-300 px-4 py-2 text-gray-600">
                 {showTyping ? (
                   <TypeAnimation
                     cursor={false}
@@ -40,11 +25,11 @@ export const BotMessage = ({
                         el?.classList.remove("custom-type-animation-cursor"),
                     ]}
                     splitter={(text) => text.split(/(?= |\n)/)}
-                    className="custom-type-animation-cursor whitespace-pre-line"
+                    className="custom-type-animation-cursor whitespace-pre-wrap"
                     speed={10}
                   />
                 ) : (
-                  <MultiLineText text={child as string} />
+                  child
                 )}
               </span>
             </div>
@@ -63,8 +48,8 @@ export const UserMessage = ({ children }: Props) => {
         {React.Children.map(children, (child: React.ReactNode) => {
           return (
             <div>
-              <span className="inline-block rounded-lg bg-blue-600 px-4 py-2 text-white">
-                <MultiLineText text={child as string} />
+              <span className="inline-block whitespace-pre-wrap break-words rounded-lg bg-blue-600 px-4 py-2 text-white">
+                {child}
               </span>
             </div>
           );
