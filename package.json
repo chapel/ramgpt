@@ -9,6 +9,8 @@
     "start": "next start"
   },
   "dependencies": {
+    "@headlessui/react": "^1.7.17",
+    "@heroicons/react": "^2.0.18",
     "@t3-oss/env-nextjs": "^0.7.0",
     "jotai": "^2.5.0",
     "langchain": "^0.0.175",

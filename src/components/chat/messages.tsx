@@ -4,11 +4,9 @@ import { type Props } from "~/components/types";
 import { type MessageText, MessageType } from "~/components/chat/types";
 import { TypeAnimation } from "react-type-animation";
 
-export const BotMessage = ({
-  icon,
-  children,
-  showTyping,
-}: Props & { icon: string; showTyping?: boolean }) => {
+// TODO: Fix this to handle history properly
+// (i.e. don't show typing animation)
+export const BotMessage = ({ icon, children }: Props & { icon: string }) => {
   return (
     <div className="flex items-end">
       <div className="order-2 mx-2 flex max-w-xl flex-col items-start space-y-2">
@@ -16,7 +14,7 @@ export const BotMessage = ({
           return (
             <div>
               <span className="inline-block whitespace-pre-wrap break-words rounded-lg rounded-bl-none bg-gray-300 px-4 py-2 text-gray-600">
-                {showTyping ? (
+                {
                   <TypeAnimation
                     cursor={false}
                     sequence={[
@@ -28,9 +26,7 @@ export const BotMessage = ({
                     className="custom-type-animation-cursor whitespace-pre-wrap"
                     speed={10}
                   />
-                ) : (
-                  child
-                )}
+                }
               </span>
             </div>
           );
@@ -62,23 +58,11 @@ export const UserMessage = ({ children }: Props) => {
 export const Message = ({ message }: { message: MessageText }) => {
   switch (message.type) {
     case MessageType.BOT_THOUGHT:
-      return (
-        <BotMessage icon="💭" showTyping={message.showTyping}>
-          {message.text}
-        </BotMessage>
-      );
+      return <BotMessage icon="💭">{message.text}</BotMessage>;
     case MessageType.BOT_FUNCTION:
-      return (
-        <BotMessage icon="⚡" showTyping={message.showTyping}>
-          {message.text}
-        </BotMessage>
-      );
+      return <BotMessage icon="⚡">{message.text}</BotMessage>;
     case MessageType.BOT_MESSAGE:
-      return (
-        <BotMessage icon="🤖" showTyping={message.showTyping}>
-          {message.text}
-        </BotMessage>
-      );
+      return <BotMessage icon="🤖">{message.text}</BotMessage>;
     case MessageType.USER_MESSAGE:
       return <UserMessage>{message.text}</UserMessage>;
   }

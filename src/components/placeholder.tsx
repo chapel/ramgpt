@@ -1,6 +1,6 @@
 export const Placeholder = () => {
   return (
-    <div className="relative h-[calc(100vh-6rem)] overflow-hidden rounded-xl border border-dashed border-gray-400 opacity-75">
+    <div className="relative h-screen overflow-hidden rounded-xl border border-dashed border-gray-400 opacity-75">
       <svg
         className="absolute inset-0 h-full w-full stroke-gray-900/10"
         fill="none"

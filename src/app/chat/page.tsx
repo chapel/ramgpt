@@ -1,42 +1,46 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
+import { useAtom, useAtomValue, useSetAtom } from "jotai";
 
 import { Messages } from "~/components/chat/messages";
 import { Header, HeaderName, SettingsButton } from "~/components/chat/header";
 import { Input } from "~/components/chat/input";
-import { Placeholder } from "~/components/placeholder";
 import { MessageType } from "~/components/chat/types";
 
 import { simple } from "./simple";
 import { messagesAtom, loadingResultAtom } from "./state";
-import { useAtom, useSetAtom } from "jotai";
+import { Settings, globalSettingsAtom } from "./settings";
 
 export default function Chat() {
   const [showSettings, setShowSettings] = useState<boolean>(false);
   const [messages, setMessages] = useAtom(messagesAtom);
   const setLoadingResult = useSetAtom(loadingResultAtom);
+  const globalSettings = useAtomValue(globalSettingsAtom);
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
-  const handleMessageSubmit = async (value: string) => {
-    value = value.trim();
-    if (value) {
-      setMessages((messages) => [
-        ...messages,
-        { type: MessageType.USER_MESSAGE, text: value },
-      ]);
+  const handleMessageSubmit = useCallback(
+    async (value: string) => {
+      value = value.trim();
+      if (value) {
+        setMessages((messages) => [
+          ...messages,
+          { type: MessageType.USER_MESSAGE, text: value },
+        ]);
 
-      setLoadingResult(true);
-      const history = messages.map((message) => message.text);
-      const res = await simple(value, history);
-      setMessages((messages) => [
-        ...messages,
-        { type: MessageType.BOT_MESSAGE, text: res, showTyping: true },
-      ]);
-      setLoadingResult(false);
-    }
-  };
+        setLoadingResult(true);
+        const history = messages.map((message) => message.text);
+        const res = await simple(value, history, globalSettings.openaiApiKey);
+        setMessages((messages) => [
+          ...messages,
+          { type: MessageType.BOT_MESSAGE, text: res },
+        ]);
+        setLoadingResult(false);
+      }
+    },
+    [messages, setMessages, setLoadingResult, globalSettings],
+  );
 
   const handleSettingsClick = () => {
     setShowSettings(!showSettings);
@@ -59,11 +63,7 @@ export default function Chat() {
           <Input onMessageSubmit={handleMessageSubmit} />
         </div>
       </main>
-      {showSettings && (
-        <aside className="sticky top-8 hidden w-96 shrink-0 xl:block">
-          <Placeholder />
-        </aside>
-      )}
+      <Settings show={showSettings} setShow={setShowSettings} />
     </div>
   );
 }

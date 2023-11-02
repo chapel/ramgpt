@@ -14,14 +14,14 @@ const TEMPLATE = `
   AI:
 `;
 
-export async function simple(userPrompt: string, history: string[]) {
+export async function simple(userPrompt: string, history: string[], openaiApiKey?: string) {
   history ??= [];
 
   const prompt = PromptTemplate.fromTemplate(TEMPLATE);
 
   const model = new ChatOpenAI({
     temperature: 0.8,
-    openAIApiKey: env.NEXT_PUBLIC_OPENAI_API_KEY,
+    openAIApiKey: openaiApiKey ?? env.NEXT_PUBLIC_OPENAI_API_KEY,
   });
 
   const outputParser = new StringOutputParser();
