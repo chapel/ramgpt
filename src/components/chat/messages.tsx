@@ -1,8 +1,8 @@
 import React from "react";
-
-import { type Props } from "~/components/types";
-import { type MessageText, MessageType } from "~/components/chat/types";
 import { TypeAnimation } from "react-type-animation";
+import { MessageType } from "~/components/chat/types";
+import type { MessageText } from "~/components/chat/types";
+import type { Props } from "~/components/types";
 
 // TODO: Fix this to handle history properly
 // (i.e. don't show typing animation)

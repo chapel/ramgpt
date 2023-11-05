@@ -1,7 +1,6 @@
 import { useAtomValue } from "jotai";
 import React, { useCallback, useState } from "react";
 import { useHotkeys } from "react-hotkeys-hook";
-
 import { loadingResultAtom } from "~/app/chat/state";
 import { ExpandableTextArea } from "~/components/expandable-text-area";
 

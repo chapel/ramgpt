@@ -12,29 +12,35 @@
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.0.18",
     "@t3-oss/env-nextjs": "^0.7.0",
+    "@tailwindcss/forms": "^0.5.6",
     "jotai": "^2.5.0",
     "langchain": "^0.0.175",
-    "next": "^13.5.4",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "next": "^14.0.1",
+    "react": "18.3.0-canary-a17467e7e-20231102",
+    "react-dom": "18.3.0-canary-a17467e7e-20231102",
     "react-hotkeys-hook": "^4.4.1",
     "react-merge-refs": "^2.1.1",
     "react-type-animation": "^3.2.0",
+    "slugify": "^1.6.6",
     "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/eslint": "^8.44.2",
     "@types/node": "^18.16.0",
-    "@types/react": "^18.2.20",
-    "@types/react-dom": "^18.2.7",
+    "@types/react": "^18.2.34",
+    "@types/react-dom": "^18.2.14",
     "@typescript-eslint/eslint-plugin": "^6.3.0",
     "@typescript-eslint/parser": "^6.3.0",
     "autoprefixer": "^10.4.14",
     "encoding": "^0.1.13",
     "eslint": "^8.47.0",
     "eslint-config-next": "^13.5.4",
+    "import-sort-parser-typescript": "^6.0.0",
+    "import-sort-style-module-scoped": "^1.0.3",
     "postcss": "^8.4.27",
     "prettier": "^3.0.0",
+    "prettier-plugin-import-sort": "^0.0.7",
+    "prettier-plugin-organize-imports": "^3.2.3",
     "prettier-plugin-tailwindcss": "^0.5.1",
     "tailwindcss": "^3.3.3",
     "typescript": "^5.1.6"
@@ -42,5 +48,11 @@
   "ct3aMetadata": {
     "initVersion": "7.22.0"
   },
-  "packageManager": "pnpm@8.9.2"
+  "packageManager": "pnpm@8.9.2",
+  "importSort": {
+    ".js, .jsx, .ts, .tsx": {
+      "parser": "typescript",
+      "style": "module-scoped"
+    }
+  }
 }

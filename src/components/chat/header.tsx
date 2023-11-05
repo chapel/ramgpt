@@ -1,5 +1,5 @@
-import { type Props } from "~/components/types";
 import { SettingsCogIcon } from "~/components/icons";
+import type { Props } from "~/components/types";
 
 export const Header = ({ children }: Props) => {
   return (
@@ -14,7 +14,7 @@ export const HeaderName = ({ children }: Props) => {
     <div className="relative flex items-center space-x-4">
       <div className="flex flex-col leading-tight">
         <div className="mt-1 flex items-center text-2xl">
-          <span className="mr-3 text-gray-700">{children}</span>
+          <h2 className="mr-3 text-2xl font-bold text-gray-900">{children}</h2>
         </div>
       </div>
     </div>

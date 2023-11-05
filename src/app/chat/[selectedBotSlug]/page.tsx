@@ -1,22 +1,33 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
-
-import { Messages } from "~/components/chat/messages";
+import { atom, useAtom, useAtomValue, useSetAtom } from "jotai";
+import { notFound } from "next/navigation";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { Header, HeaderName, SettingsButton } from "~/components/chat/header";
 import { Input } from "~/components/chat/input";
+import { Messages } from "~/components/chat/messages";
 import { MessageType } from "~/components/chat/types";
 
-import { simple } from "./simple";
-import { messagesAtom, loadingResultAtom } from "./state";
-import { Settings, globalSettingsAtom } from "./settings";
+import { Settings } from "../settings";
+import { botListAtom, botSettingsAtom, selectedBotAtom } from "../settings/bot";
+import { globalSettingsAtom } from "../settings/global";
+import { simple } from "../simple";
+import { loadingResultAtom, messagesAtom } from "../state";
 
-export default function Chat() {
-  const [showSettings, setShowSettings] = useState<boolean>(false);
+export const showSettingsAtom = atom<boolean>(false);
+
+export default function Chat({
+  params,
+}: {
+  params: { selectedBotSlug: string };
+}) {
+  const setShowSettings = useSetAtom(showSettingsAtom);
   const [messages, setMessages] = useAtom(messagesAtom);
   const setLoadingResult = useSetAtom(loadingResultAtom);
   const globalSettings = useAtomValue(globalSettingsAtom);
+  const botSettings = useAtomValue(botSettingsAtom);
+  const bots = useAtomValue(botListAtom);
+  const setSelectedBot = useSetAtom(selectedBotAtom);
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -42,16 +53,30 @@ export default function Chat() {
     [messages, setMessages, setLoadingResult, globalSettings],
   );
 
-  const handleSettingsClick = () => {
-    setShowSettings(!showSettings);
-  };
+  const handleSettingsClick = useCallback(() => {
+    setShowSettings((showSettings) => !showSettings);
+  }, [setShowSettings]);
+
+  const isValidSelectedBot = useMemo(() => {
+    return [...bots.values()].some((bot) => bot.id === params.selectedBotSlug);
+  }, [params.selectedBotSlug, bots]);
+
+  useEffect(() => {
+    if (isValidSelectedBot) {
+      setSelectedBot(params.selectedBotSlug);
+    }
+  }, [isValidSelectedBot, setSelectedBot, params]);
+
+  if (!isValidSelectedBot) {
+    return notFound();
+  }
 
   return (
     <div className="mx-auto flex w-full max-w-7xl items-start gap-x-8 px-4 py-0 sm:px-6 lg:px-8">
       <main className="flex-1">
         <div className="p:2 flex h-screen flex-1 flex-col justify-between pb-4">
           <Header>
-            <HeaderName>Bot</HeaderName>
+            <HeaderName>{botSettings?.name}</HeaderName>
             <SettingsButton onClick={handleSettingsClick} />
           </Header>
           <div
@@ -63,7 +88,7 @@ export default function Chat() {
           <Input onMessageSubmit={handleMessageSubmit} />
         </div>
       </main>
-      <Settings show={showSettings} setShow={setShowSettings} />
+      <Settings />
     </div>
   );
 }

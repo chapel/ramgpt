@@ -13,13 +13,24 @@ const truncateString = (str: string, startTrunc: number, endTrunc: number) => {
 };
 
 export const VisualTruncateInput = ({
+  id,
+  name,
   startTrunc,
   endTrunc,
   value,
   onChange,
+  type,
+  className,
+  defaultValue,
   ...props
-}: InputProps & { startTrunc: number; endTrunc: number }) => {
-  const [managedValue, setManagedValue] = useState(String(value ?? ""));
+}: InputProps & {
+  startTrunc: number;
+  endTrunc: number;
+  onChange?: (value: string) => void;
+}) => {
+  const [managedValue, setManagedValue] = useState(
+    String(defaultValue ?? value ?? ""),
+  );
   const [visibleValue, setVisibleValue] = useState(
     truncateString(managedValue, startTrunc, endTrunc),
   );
@@ -29,9 +40,8 @@ export const VisualTruncateInput = ({
       const value = e.target.value;
       setManagedValue(value);
       setVisibleValue(value);
-      onChange?.(e);
     },
-    [setManagedValue, onChange],
+    [setManagedValue],
   );
 
   const handleFocus = useCallback(() => {
@@ -42,13 +52,31 @@ export const VisualTruncateInput = ({
     setVisibleValue(truncateString(managedValue, startTrunc, endTrunc));
   }, [setVisibleValue, managedValue, startTrunc, endTrunc]);
 
+  const fallbackOnChange = useCallback(() => {
+    onChange?.(managedValue);
+  }, [onChange, managedValue]);
+
   return (
-    <input
-      value={visibleValue}
-      onChange={handleChange}
-      onFocus={handleFocus}
-      onBlur={handleBlur}
-      {...props}
-    />
+    <>
+      <input
+        id={`${id}-visual-truncate`}
+        name={`${name}-visual-truncate`}
+        type={type}
+        value={visibleValue}
+        onChange={handleChange}
+        onFocus={handleFocus}
+        onBlur={handleBlur}
+        className={className}
+      />
+      <input
+        id={id}
+        name={name}
+        type={type}
+        value={managedValue}
+        onChange={fallbackOnChange}
+        className="hidden"
+        {...props}
+      />
+    </>
   );
 };
