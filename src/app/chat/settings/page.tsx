@@ -5,9 +5,7 @@ import { redirect } from "next/navigation";
 import { useCallback } from "react";
 import { useFormState } from "react-dom";
 import slugify from "slugify";
-import { PopoutSideMenu } from "~/components/popout-side-menu";
 
-import { showSettingsAtom } from "../[selectedBotSlug]/page";
 import { BotSettings, botListAtom, botSettingsAtom } from "./bot";
 import { GlobalSettings, globalSettingsAtom } from "./global";
 
@@ -49,15 +47,10 @@ interface SettingsForm {
   botSettings: BotSettingsFormData;
 }
 
-export const Settings = () => {
-  const [show, setShow] = useAtom(showSettingsAtom);
+export default function Settings() {
   const [globalSettings, setGlobalSettings] = useAtom(globalSettingsAtom);
   const botSettings = useAtomValue(botSettingsAtom);
   const setBotList = useSetAtom(botListAtom);
-
-  const handleCancel = useCallback(() => {
-    setShow(false);
-  }, [setShow]);
 
   const handleFormAction = useCallback(
     (previousState: SettingsForm, formData: FormData) => {
@@ -83,8 +76,6 @@ export const Settings = () => {
         return botList;
       });
 
-      setShow(false);
-
       if (nameChanged) {
         redirect(`/chat/${botSettings?.id}`);
       }
@@ -101,7 +92,7 @@ export const Settings = () => {
         },
       });
     },
-    [setGlobalSettings, setBotList, globalSettings, botSettings, setShow],
+    [setGlobalSettings, setBotList, globalSettings, botSettings],
   );
 
   const [formState, formAction] = useFormState<SettingsForm, FormData>(
@@ -110,27 +101,25 @@ export const Settings = () => {
   );
 
   return (
-    <PopoutSideMenu
-      show={show}
-      title="Settings"
-      description="Manage global settings and bot configurations."
-      onClose={handleCancel}
-      buttons={<Buttons onCancel={handleCancel} />}
-    >
-      <form
-        id="settings"
-        className="flex h-full flex-col divide-y divide-gray-200 bg-white"
-        action={formAction}
-      >
-        <div className="flex flex-1 flex-col justify-between">
-          <div className="divide-y divide-gray-200">
-            <div className="space-y-6">
-              <GlobalSettings />
-              <BotSettings />
+    <main className="lg:pl-72">
+      <div className="xl:pr-96">
+        <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-6">
+          <form
+            id="settings"
+            className="flex h-full w-[80vw] flex-col divide-y divide-gray-200 bg-white"
+            action={formAction}
+          >
+            <div className="flex flex-1 flex-col justify-between">
+              <div className="divide-y divide-gray-200">
+                <div className="space-y-6">
+                  <GlobalSettings />
+                  <BotSettings />
+                </div>
+              </div>
             </div>
-          </div>
+          </form>
         </div>
-      </form>
-    </PopoutSideMenu>
+      </div>
+    </main>
   );
-};
+}

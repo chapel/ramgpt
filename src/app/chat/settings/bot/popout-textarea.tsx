@@ -1,8 +1,5 @@
-import { useSetAtom } from "jotai";
 import { useCallback, useState } from "react";
 import { Modal } from "~/components/modal";
-
-import { showSettingsAtom } from "../../[selectedBotSlug]/page";
 
 type TextAreaProps = React.DetailedHTMLProps<
   React.TextareaHTMLAttributes<HTMLTextAreaElement>,
@@ -15,23 +12,19 @@ export const PopoutTextarea = ({
   defaultValue,
   ...props
 }: TextAreaProps) => {
-  const setShowSettings = useSetAtom(showSettingsAtom);
-
   const [show, setShow] = useState(false);
   const [internalValue, setInteralValue] = useState(defaultValue ?? "");
 
   const handleShow = useCallback(() => {
-    setShowSettings(false);
     setTimeout(() => {
       setShow(true);
     }, 100);
-  }, [setShow, setShowSettings]);
+  }, [setShow]);
 
   const handleClose = useCallback(() => {
     console.log("close");
     setShow(false);
-    setShowSettings(true);
-  }, [setShow, setShowSettings]);
+  }, [setShow]);
 
   const handleChange = useCallback(
     (e: React.ChangeEvent<HTMLTextAreaElement>) => {

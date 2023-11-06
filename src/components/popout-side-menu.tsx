@@ -49,7 +49,7 @@ export const PopoutSideMenu = ({
                 leaveFrom="translate-x-0"
                 leaveTo="translate-x-full"
               >
-                <Dialog.Panel className="pointer-events-auto w-screen max-w-md">
+                <Dialog.Panel className="pointer-events-auto max-w-full">
                   <div className="flex h-full flex-col divide-y divide-gray-200 bg-white shadow-xl">
                     <div className="flex min-h-0 flex-1 flex-col overflow-y-scroll py-6">
                       <div className="px-4 sm:px-6">
