@@ -1,20 +1,13 @@
 "use client";
 
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import { Header, HeaderName } from "~/components/chat/header";
 import { Input } from "~/components/chat/input";
 import { Messages } from "~/components/chat/messages";
 import { MessageType } from "~/components/chat/types";
-import { SettingsCogIcon } from "~/components/icons";
 
-import {
-  botListAtom,
-  botSettingsAtom,
-  selectedBotAtom,
-} from "../../settings/bot";
+import { botListAtom, selectedBotAtom } from "../../settings/bot";
 import { globalSettingsAtom } from "../../settings/global";
 import { simple } from "../../simple";
 import { loadingResultAtom, messagesAtom } from "../../state";
@@ -27,7 +20,6 @@ export default function Chat({
   const [messages, setMessages] = useAtom(messagesAtom);
   const setLoadingResult = useSetAtom(loadingResultAtom);
   const globalSettings = useAtomValue(globalSettingsAtom);
-  const botSettings = useAtomValue(botSettingsAtom);
   const bots = useAtomValue(botListAtom);
   const setSelectedBot = useSetAtom(selectedBotAtom);
 
