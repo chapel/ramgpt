@@ -1,10 +1,12 @@
-export default function Example() {
+import Link from "next/link";
+
+export default function NoChat() {
   return (
-    <main className="">
-      <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-6">
-        <div className="mx-auto max-w-lg">
-          <button
-            type="button"
+    <main className="h-full">
+      <div className="flex h-full items-center px-4 py-10 sm:px-6 lg:px-8 lg:py-6">
+        <div className="mx-auto">
+          <Link
+            href="/chat/new"
             className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
             <svg
@@ -24,7 +26,7 @@ export default function Example() {
             <span className="mt-2 block text-sm font-semibold text-gray-900">
               Create a new chat bot
             </span>
-          </button>
+          </Link>
         </div>
       </div>
     </main>

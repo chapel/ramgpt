@@ -4,7 +4,7 @@ import { Fragment, useCallback } from "react";
 import { Listbox, Transition } from "@headlessui/react";
 import { CheckIcon, ChevronUpDownIcon } from "@heroicons/react/24/outline";
 
-import { botListAtom, botSettingsAtom, selectedBotAtom } from ".";
+import { botListAtom, botSettingsAtom, selectedBotAtom } from "./page";
 
 export const BotSelect = () => {
   const botSettings = useAtomValue(botSettingsAtom);

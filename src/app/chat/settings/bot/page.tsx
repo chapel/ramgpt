@@ -1,3 +1,5 @@
+"use client";
+
 import { atom, useAtomValue } from "jotai";
 
 import { PopoutTextarea } from "./popout-textarea";
@@ -31,7 +33,7 @@ export const botSettingsAtom = atom<BotSettingsAtom | undefined>((get) => {
   return [...bots.values()].find((bot) => bot.id === selectedBot) ?? undefined;
 });
 
-export const BotSettings = () => {
+export default function BotSettings() {
   const botSettings = useAtomValue(botSettingsAtom);
 
   return (
@@ -73,4 +75,4 @@ export const BotSettings = () => {
       </div>
     </div>
   );
-};
+}

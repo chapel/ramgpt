@@ -22,6 +22,7 @@ export const VisualTruncateInput = ({
   type,
   className,
   defaultValue,
+  placeholder,
   ...props
 }: InputProps & {
   startTrunc: number;
@@ -63,6 +64,7 @@ export const VisualTruncateInput = ({
         name={`${name}-visual-truncate`}
         type={type}
         value={visibleValue}
+        placeholder={placeholder}
         onChange={handleChange}
         onFocus={handleFocus}
         onBlur={handleBlur}

@@ -7,7 +7,7 @@ import { Input } from "~/components/chat/input";
 import { Messages } from "~/components/chat/messages";
 import { MessageType } from "~/components/chat/types";
 
-import { botListAtom, selectedBotAtom } from "../../settings/bot";
+import { botListAtom, selectedBotAtom } from "../../settings/bot/page";
 import { globalSettingsAtom } from "../../settings/global";
 import { simple } from "../../simple";
 import { loadingResultAtom, messagesAtom } from "../../state";
