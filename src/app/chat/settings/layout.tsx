@@ -4,7 +4,7 @@ import type { Tab } from "~/components/chat/tab-bar";
 
 const TABS: Tab[] = [
   { name: "OpenAI", href: "/chat/settings/openai" },
-  { name: "Bot", href: "/chat/settings/bot" },
+  { name: "Bots", href: "/chat/settings/bots" },
 ];
 
 export default function SettingsLayout({ children }: { children: ReactNode }) {

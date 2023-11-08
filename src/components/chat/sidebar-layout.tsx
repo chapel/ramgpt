@@ -6,7 +6,7 @@ import { useAtomValue } from "jotai";
 import { usePathname } from "next/navigation";
 import { Fragment, useState } from "react";
 import type { ElementType, ReactNode } from "react";
-import { botListAtom, botSettingsAtom } from "~/app/chat/settings/bot/page";
+import { botListAtom, botSettingsAtom } from "~/app/chat/settings/bots/page";
 
 import { Dialog, Transition } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";

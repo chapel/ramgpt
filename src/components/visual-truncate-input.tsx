@@ -24,7 +24,7 @@ export const VisualTruncateInput = ({
   defaultValue,
   placeholder,
   ...props
-}: InputProps & {
+}: Omit<InputProps, "onChange"> & {
   startTrunc: number;
   endTrunc: number;
   onChange?: (value: string) => void;
@@ -41,8 +41,9 @@ export const VisualTruncateInput = ({
       const value = e.target.value;
       setManagedValue(value);
       setVisibleValue(value);
+      onChange?.(value);
     },
-    [setManagedValue],
+    [setManagedValue, setVisibleValue, onChange],
   );
 
   const handleFocus = useCallback(() => {
