@@ -1,19 +1,17 @@
 "use client";
 
-import { atom, useAtom } from "jotai";
+import { useSnapshot } from "valtio";
 import { VisualTruncateInput } from "~/components/visual-truncate-input";
 
-export interface GlobalSettingsAtom {
-  openaiApiKey?: string;
-  openaiModel: string;
-}
-
-export const globalSettingsAtom = atom<GlobalSettingsAtom>({
-  openaiModel: "gpt-4-1106-preview",
-});
+import {
+  MODEL_MAP,
+  OPENAI_SETTINGS,
+  setApiKey,
+  setModel,
+} from "./openai-state";
 
 export default function Settings() {
-  const [globalSettings, setGlobalSettings] = useAtom(globalSettingsAtom);
+  const openaiState = useSnapshot(OPENAI_SETTINGS);
 
   return (
     <main className="px-4">
@@ -56,13 +54,8 @@ export default function Settings() {
                   type="text"
                   name="openai-api-key"
                   id="openai-api-key"
-                  value={globalSettings.openaiApiKey ?? ""}
-                  onChange={(value) =>
-                    setGlobalSettings((settings) => ({
-                      ...settings,
-                      openaiApiKey: value,
-                    }))
-                  }
+                  value={openaiState.apiKey ?? ""}
+                  onChange={setApiKey}
                   startTrunc={3}
                   endTrunc={4}
                   placeholder="sk-...dQNq"
@@ -83,21 +76,14 @@ export default function Settings() {
                 id="openai-model"
                 name="openai-model"
                 className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:max-w-xs sm:text-sm sm:leading-6"
-                value={globalSettings.openaiModel ?? ""}
-                onChange={(event) =>
-                  setGlobalSettings((settings) => ({
-                    ...settings,
-                    openaiModel: event.target.value,
-                  }))
-                }
+                value={openaiState.model ?? ""}
+                onChange={(event) => setModel(event.target.value)}
               >
-                <option value="gpt-4-1106-preview">
-                  GPT-4 Turbo Preview (128k tokens)
-                </option>
-                <option value="gpt-4">GPT-4 (8k tokens)</option>
-                <option value="gpt-3.5-turbo-16k">
-                  GPT-3.5 Turbo (16k tokens)
-                </option>
+                {Object.entries(MODEL_MAP).map(([name, description]) => (
+                  <option key={name} value={name}>
+                    {description}
+                  </option>
+                ))}
               </select>
             </div>
           </div>

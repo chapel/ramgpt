@@ -1,6 +1,6 @@
 "use client";
 
-import { useAtom, useAtomValue, useSetAtom } from "jotai";
+import { useAtom, useSetAtom } from "jotai";
 import { notFound } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSnapshot } from "valtio";
@@ -9,7 +9,7 @@ import { Messages } from "~/components/chat/messages";
 import { MessageType } from "~/components/chat/types";
 
 import { BOT_SETTINGS } from "../../settings/bots/[[...slug]]/bot-state";
-import { globalSettingsAtom } from "../../settings/openai/page";
+import { OPENAI_SETTINGS } from "../../settings/openai/openai-state";
 import { simple } from "../../simple";
 import { loadingResultAtom, messagesAtom } from "../../state";
 
@@ -20,8 +20,8 @@ export default function Chat({
 }) {
   const [messages, setMessages] = useAtom(messagesAtom);
   const setLoadingResult = useSetAtom(loadingResultAtom);
-  const globalSettings = useAtomValue(globalSettingsAtom);
   const botState = useSnapshot(BOT_SETTINGS);
+  const openaiState = useSnapshot(OPENAI_SETTINGS);
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +36,7 @@ export default function Chat({
 
         setLoadingResult(true);
         const history = messages.map((message) => message.text);
-        const res = await simple(value, history, globalSettings.openaiApiKey);
+        const res = await simple(value, history, openaiState.apiKey);
         setMessages((messages) => [
           ...messages,
           { type: MessageType.BOT_MESSAGE, text: res },
@@ -44,7 +44,7 @@ export default function Chat({
         setLoadingResult(false);
       }
     },
-    [messages, setMessages, setLoadingResult, globalSettings],
+    [messages, setMessages, setLoadingResult, openaiState],
   );
 
   const isValidSelectedBot = useMemo(() => {
