@@ -186,20 +186,21 @@ const Settings = ({ botSettings }: { botSettings: BotSettings }) => {
 };
 
 const handleFormSave = (oldState: BotSettings, formData: FormData) => {
+  const id = formData.get("selected-bot") as string;
   const name = formData.get("name") as string;
   const systemPrompt = formData.get("system-prompt") as string;
   const profilePrompt = formData.get("profile-prompt") as string;
   const humanPrompt = formData.get("human-prompt") as string;
 
   const newState: BotSettings = {
-    ...oldState,
+    id,
     name,
     systemPrompt,
     profilePrompt,
     humanPrompt,
   };
 
-  updateBot(oldState.id, newState);
+  updateBot(id, newState);
 
   return Promise.resolve(newState);
 };

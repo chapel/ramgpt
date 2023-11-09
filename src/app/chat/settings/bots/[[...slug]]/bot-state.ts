@@ -1,6 +1,7 @@
 "use client";
 
-import { proxy } from "valtio";
+import { humanId } from "human-id";
+import { proxy, subscribe } from "valtio";
 import { proxyMap } from "valtio/utils";
 
 export interface BotSettings {
@@ -17,17 +18,14 @@ export interface BotSettingsProxy {
   selectedBot: BotSettings | undefined;
 }
 
-const DEFAULT_BOTS: readonly [string, BotSettings][] = [
-  ["test", { id: "test", name: "Test" }],
-  ["test2", { id: "test2", name: "Test 2" }],
-];
+class BotSettingsContainer implements BotSettingsProxy {
+  selectedId?: string;
+  map: Map<string, BotSettings>;
 
-export const BOT_SETTINGS = proxy<BotSettingsProxy>({
-  selectedId: "test",
-  map: proxyMap<string, BotSettings>(DEFAULT_BOTS),
-  set selectedBot(bot: BotSettings | undefined) {
-    this.selectedId = bot?.id;
-  },
+  constructor(map: Map<string, BotSettings>) {
+    this.map = map;
+  }
+
   get selectedBot(): BotSettings | undefined {
     if (this.map.size == 0) {
       return undefined;
@@ -36,7 +34,43 @@ export const BOT_SETTINGS = proxy<BotSettingsProxy>({
     }
 
     return this.map.get(this.selectedId);
-  },
+  }
+
+  set selectedBot(bot: BotSettings | undefined) {
+    this.selectedId = bot?.id;
+  }
+}
+
+interface StoredBotSettings {
+  selectedId?: string;
+  map: [string, BotSettings][];
+}
+
+const isStoredSettings = (settings: unknown): settings is StoredBotSettings => {
+  return (settings as StoredBotSettings).map !== undefined;
+};
+
+const getStoredSettings = (): BotSettingsProxy | undefined => {
+  const settings = new BotSettingsContainer(proxyMap<string, BotSettings>());
+  const storedSettings = localStorage.getItem("bot-settings");
+  if (storedSettings) {
+    const parsedSettings: unknown = JSON.parse(storedSettings);
+    if (isStoredSettings(parsedSettings)) {
+      settings.selectedId = parsedSettings.selectedId;
+      settings.map = proxyMap<string, BotSettings>(parsedSettings.map);
+    }
+  }
+  return settings;
+};
+
+export const BOT_SETTINGS = proxy<BotSettingsProxy>(getStoredSettings());
+
+subscribe(BOT_SETTINGS, () => {
+  const settingsToStore = {
+    selectedId: BOT_SETTINGS.selectedId,
+    map: Array.from(BOT_SETTINGS.map.entries()),
+  };
+  localStorage.setItem("bot-settings", JSON.stringify(settingsToStore));
 });
 
 export const deleteBot = (id: string) => {
@@ -47,10 +81,8 @@ export const deleteBot = (id: string) => {
 export const cloneBot = (id: string) => {
   const sourceBot = BOT_SETTINGS.map.get(id);
   if (sourceBot) {
-    const cloneId = id + "-clone";
-    BOT_SETTINGS.map.set(cloneId, {
+    createBot({
       ...sourceBot,
-      id: cloneId,
       name: sourceBot.name + " Clone",
     });
   }
@@ -61,5 +93,19 @@ export const updateBot = (id: string, settings: BotSettings) => {
 };
 
 export const createBot = (settings: BotSettings) => {
+  settings.id = humanId({
+    separator: "-",
+    capitalize: false,
+  });
+
+  if (BOT_SETTINGS.map.has(settings.id)) {
+    createBot(settings);
+    return;
+  }
+
   BOT_SETTINGS.map.set(settings.id, settings);
+};
+
+export const setSelectedId = (value: string) => {
+  BOT_SETTINGS.selectedId = value;
 };
