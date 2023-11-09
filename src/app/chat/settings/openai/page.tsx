@@ -21,7 +21,7 @@ export default function Settings() {
         <p className="mt-4 text-sm font-medium leading-6 text-gray-900">
           Please note:
         </p>
-        <ul className="text-sm leading-6 text-gray-600">
+        <ul role="list" className="text-sm leading-6 text-gray-600">
           <li>
             Your API key and any data you enter or generate remain private.
           </li>

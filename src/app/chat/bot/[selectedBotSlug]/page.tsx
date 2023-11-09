@@ -3,11 +3,12 @@
 import { useAtom, useAtomValue, useSetAtom } from "jotai";
 import { notFound } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
+import { useSnapshot } from "valtio";
 import { Input } from "~/components/chat/input";
 import { Messages } from "~/components/chat/messages";
 import { MessageType } from "~/components/chat/types";
 
-import { botListAtom, selectedBotAtom } from "../../settings/bots/page";
+import { BOT_SETTINGS } from "../../settings/bots/[[...slug]]/bot-state";
 import { globalSettingsAtom } from "../../settings/openai/page";
 import { simple } from "../../simple";
 import { loadingResultAtom, messagesAtom } from "../../state";
@@ -20,8 +21,7 @@ export default function Chat({
   const [messages, setMessages] = useAtom(messagesAtom);
   const setLoadingResult = useSetAtom(loadingResultAtom);
   const globalSettings = useAtomValue(globalSettingsAtom);
-  const bots = useAtomValue(botListAtom);
-  const setSelectedBot = useSetAtom(selectedBotAtom);
+  const botState = useSnapshot(BOT_SETTINGS);
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -48,14 +48,16 @@ export default function Chat({
   );
 
   const isValidSelectedBot = useMemo(() => {
-    return [...bots.values()].some((bot) => bot.id === params.selectedBotSlug);
-  }, [params.selectedBotSlug, bots]);
+    return [...botState.map.values()].some(
+      (bot) => bot.id === params.selectedBotSlug,
+    );
+  }, [params.selectedBotSlug, botState]);
 
   useEffect(() => {
     if (isValidSelectedBot) {
-      setSelectedBot(params.selectedBotSlug);
+      BOT_SETTINGS.selectedId = params.selectedBotSlug;
     }
-  }, [isValidSelectedBot, setSelectedBot, params]);
+  }, [isValidSelectedBot, params]);
 
   if (!isValidSelectedBot) {
     return notFound();

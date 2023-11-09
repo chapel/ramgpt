@@ -2,11 +2,11 @@
 
 /* eslint-disable @next/next/no-img-element */
 
-import { useAtomValue } from "jotai";
 import { usePathname } from "next/navigation";
 import { Fragment, useState } from "react";
 import type { ElementType, ReactNode } from "react";
-import { botListAtom, botSettingsAtom } from "~/app/chat/settings/bots/page";
+import { useSnapshot } from "valtio";
+import { BOT_SETTINGS } from "~/app/chat/settings/bots/[[...slug]]/bot-state";
 
 import { Dialog, Transition } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
@@ -41,7 +41,7 @@ const isPathActive = (pathname: string, href: string) => {
 
 const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
   const pathname = usePathname();
-  const bots = useAtomValue(botListAtom);
+  const botState = useSnapshot(BOT_SETTINGS);
 
   return (
     <div
@@ -89,7 +89,7 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
             </div>
             <ul role="list" className="-mx-2 mt-2 space-y-1">
               {/* Sub items */}
-              {[...bots.values()].map((bot) => (
+              {[...botState.map.values()].map((bot) => (
                 <li key={bot.id}>
                   <a
                     href={`/chat/bot/${bot.id}`}
@@ -97,16 +97,14 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
                       isPathActive(pathname, `/chat/bot/${bot.id}`)
                         ? "bg-gray-50 text-indigo-600"
                         : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                    }
-                                    group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6`}
+                    } group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6`}
                   >
                     <span
                       className={`${
                         isPathActive(pathname, `/chat/bot/${bot.id}`)
                           ? "border-indigo-600 text-indigo-600"
                           : "border-gray-200 text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
-                      }
-                                      flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border bg-white text-[0.625rem] font-medium`}
+                      } flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border bg-white text-[0.625rem] font-medium`}
                     >
                       {bot.name[0]}
                     </span>
@@ -114,23 +112,21 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
                   </a>
                 </li>
               ))}
-              <li>
+              <li className="border-t-[1px]">
                 <a
-                  href={`/chat/new`}
+                  href={`/chat/settings/bots/new`}
                   className={`${
                     isPathActive(pathname, "/chat/new")
                       ? "bg-gray-50 text-indigo-600"
                       : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                  }
-                                    group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6`}
+                  } group flex gap-x-3 rounded-md p-2 text-sm font-normal leading-6`}
                 >
                   <span
                     className={`${
                       isPathActive(pathname, "/chat/new")
                         ? "border-indigo-600 text-indigo-600"
                         : "border-gray-200 text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
-                    }
-                                      flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border bg-white text-[0.625rem] font-medium`}
+                    } flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border bg-white text-lg`}
                   >
                     +
                   </span>
@@ -148,7 +144,7 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
 export const SidebarLayout = ({ children }: { children: ReactNode }) => {
   const pathname = usePathname();
   const [show, setShow] = useState(false);
-  const botSettings = useAtomValue(botSettingsAtom);
+  const botState = useSnapshot(BOT_SETTINGS);
 
   return (
     <>
@@ -213,7 +209,7 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
       </Transition.Root>
 
       {/* Desktop sidebar */}
-      <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
+      <div className="hidden lg:fixed lg:inset-y-0 lg:z-40 lg:flex lg:w-72 lg:flex-col">
         {/* Sidebar Content */}
         <Sidebar />
       </div>
@@ -230,9 +226,9 @@ export const SidebarLayout = ({ children }: { children: ReactNode }) => {
           </button>
           <div className="flex-1 text-sm font-semibold leading-6 text-gray-900">
             {`${
-              isPathActive(pathname, `/chat/bot/${botSettings?.id}`) &&
-              botSettings
-                ? botSettings.name
+              isPathActive(pathname, `/chat/bot/${botState.selectedBot?.id}`) &&
+              botState.selectedBot
+                ? botState.selectedBot.name
                 : ""
             } ${NAV_ITEMS.find((item) => isPathActive(pathname, item.href))
               ?.name}`}

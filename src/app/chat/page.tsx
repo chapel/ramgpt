@@ -6,7 +6,7 @@ export default function NoChat() {
       <div className="flex h-full items-center px-4 py-10 sm:px-6 lg:px-8 lg:py-6">
         <div className="mx-auto">
           <Link
-            href="/chat/new"
+            href="/chat/settings/bots/new"
             className="relative block w-full rounded-lg border-2 border-dashed border-gray-300 p-12 text-center hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
           >
             <svg
