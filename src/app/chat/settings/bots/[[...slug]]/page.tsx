@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useFormState } from "react-dom";
 import { useSnapshot } from "valtio";
 import { Modal } from "~/components/modal";
@@ -231,6 +231,11 @@ const handleFormCreate = (oldState: BotSettings, formData: FormData) => {
 export default function BotsSettings({ params }: { params: { slug: string } }) {
   const router = useRouter();
   const botState = useSnapshot(BOT_SETTINGS);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handleDelete = useCallback(() => {
     if (botState.selectedId !== undefined) {
@@ -265,6 +270,10 @@ export default function BotsSettings({ params }: { params: { slug: string } }) {
    *    * Profile
    *    * Human
    */
+
+  if (!isClient) {
+    return null;
+  }
 
   if (isNewPage) {
     return (

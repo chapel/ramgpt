@@ -3,7 +3,7 @@
 /* eslint-disable @next/next/no-img-element */
 
 import { usePathname } from "next/navigation";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
 import type { ElementType, ReactNode } from "react";
 import { useSnapshot } from "valtio";
 import { BOT_SETTINGS } from "~/app/chat/settings/bots/[[...slug]]/bot-state";
@@ -42,6 +42,11 @@ const isPathActive = (pathname: string, href: string) => {
 const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
   const pathname = usePathname();
   const botState = useSnapshot(BOT_SETTINGS);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   return (
     <div
@@ -87,53 +92,55 @@ const Sidebar = ({ isMobile }: { isMobile?: boolean }) => {
             <div className="text-xs font-semibold leading-6 text-gray-400">
               Your bots
             </div>
-            <ul role="list" className="-mx-2 mt-2 space-y-1">
-              {/* Sub items */}
-              {[...botState.map.values()].map((bot) => (
-                <li key={bot.id}>
+            {isClient ? (
+              <ul role="list" className="-mx-2 mt-2 space-y-1">
+                {/* Sub items */}
+                {[...botState.map.values()].map((bot) => (
+                  <li key={bot.id}>
+                    <a
+                      href={`/chat/bot/${bot.id}`}
+                      className={`${
+                        isPathActive(pathname, `/chat/bot/${bot.id}`)
+                          ? "bg-gray-50 text-indigo-600"
+                          : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
+                      } group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6`}
+                    >
+                      <span
+                        className={`${
+                          isPathActive(pathname, `/chat/bot/${bot.id}`)
+                            ? "border-indigo-600 text-indigo-600"
+                            : "border-gray-200 text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
+                        } flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border bg-white text-[0.625rem] font-medium`}
+                      >
+                        {bot.name[0]}
+                      </span>
+                      <span className="truncate">{bot.name}</span>
+                    </a>
+                  </li>
+                ))}
+                <li className="border-t-[1px]">
                   <a
-                    href={`/chat/bot/${bot.id}`}
+                    href={`/chat/settings/bots/new`}
                     className={`${
-                      isPathActive(pathname, `/chat/bot/${bot.id}`)
+                      isPathActive(pathname, "/chat/new")
                         ? "bg-gray-50 text-indigo-600"
                         : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                    } group flex gap-x-3 rounded-md p-2 text-sm font-semibold leading-6`}
+                    } group flex gap-x-3 rounded-md p-2 text-sm font-normal leading-6`}
                   >
                     <span
                       className={`${
-                        isPathActive(pathname, `/chat/bot/${bot.id}`)
+                        isPathActive(pathname, "/chat/new")
                           ? "border-indigo-600 text-indigo-600"
                           : "border-gray-200 text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
-                      } flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border bg-white text-[0.625rem] font-medium`}
+                      } flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border bg-white text-lg`}
                     >
-                      {bot.name[0]}
+                      +
                     </span>
-                    <span className="truncate">{bot.name}</span>
+                    <span className="truncate">New Bot</span>
                   </a>
                 </li>
-              ))}
-              <li className="border-t-[1px]">
-                <a
-                  href={`/chat/settings/bots/new`}
-                  className={`${
-                    isPathActive(pathname, "/chat/new")
-                      ? "bg-gray-50 text-indigo-600"
-                      : "text-gray-700 hover:bg-gray-50 hover:text-indigo-600"
-                  } group flex gap-x-3 rounded-md p-2 text-sm font-normal leading-6`}
-                >
-                  <span
-                    className={`${
-                      isPathActive(pathname, "/chat/new")
-                        ? "border-indigo-600 text-indigo-600"
-                        : "border-gray-200 text-gray-400 group-hover:border-indigo-600 group-hover:text-indigo-600"
-                    } flex h-6 w-6 shrink-0 items-center justify-center rounded-lg border bg-white text-lg`}
-                  >
-                    +
-                  </span>
-                  <span className="truncate">New Bot</span>
-                </a>
-              </li>
-            </ul>
+              </ul>
+            ) : null}
           </li>
         </ul>
       </nav>
