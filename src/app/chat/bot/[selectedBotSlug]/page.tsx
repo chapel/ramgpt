@@ -64,19 +64,17 @@ export default function Chat({
   }
 
   return (
-    <main className="lg:pl-72">
-      <div className="xl:pr-96">
-        <div className="px-4 py-10 sm:px-6 lg:px-8 lg:py-6">
-          <div className="flex-1">
-            <div className="p:2 flex h-screen flex-1 flex-col justify-between pb-4">
-              <div
-                className="max-w-screen flex flex-1 flex-col-reverse overflow-y-auto"
-                ref={messagesContainerRef}
-              >
-                <Messages messages={messages} />
-              </div>
-              <Input onMessageSubmit={handleMessageSubmit} />
+    <main className="h-full">
+      <div className="h-full py-10 lg:py-6">
+        <div className="h-full flex-1">
+          <div className="p:2 flex h-full flex-1 flex-col justify-between">
+            <div
+              className="max-w-screen flex flex-1 flex-col-reverse overflow-y-auto"
+              ref={messagesContainerRef}
+            >
+              <Messages messages={messages} />
             </div>
+            <Input onMessageSubmit={handleMessageSubmit} />
           </div>
         </div>
       </div>

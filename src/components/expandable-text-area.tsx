@@ -34,9 +34,9 @@ export const ExpandableTextArea = forwardRef<HTMLTextAreaElement, Props>(
       const mirror = mirrorRef.current;
       if (mirror && !singleRowHeight) {
         mirror.textContent = "A";
-        setSingleRowHeight(mirror.clientHeight);
+        setSingleRowHeight(mirror.offsetHeight);
       }
-    }, [singleRowHeight]);
+    }, [singleRowHeight, setSingleRowHeight, mirrorRef]);
 
     useEffect(() => {
       const current = ref.current;
@@ -46,7 +46,7 @@ export const ExpandableTextArea = forwardRef<HTMLTextAreaElement, Props>(
         mirror.style.width = `${current.clientWidth}px`;
         mirror.textContent = current.value + "\n";
 
-        let height = mirror.clientHeight;
+        let height = mirror.offsetHeight;
 
         if (maxRows) {
           const visualRows = Math.ceil(height / singleRowHeight);
@@ -70,7 +70,7 @@ export const ExpandableTextArea = forwardRef<HTMLTextAreaElement, Props>(
       <div className={(wrapperClassName ?? "") + " relative"}>
         <div
           ref={mirrorRef}
-          className="overflow-wrap pointer-events-none absolute -left-[9999px] -top-[9999px] whitespace-pre-wrap break-words text-transparent"
+          className={`overflow-wrap pointer-events-none absolute -left-[9999px] -top-[9999px] whitespace-pre-wrap break-words border leading-6 text-transparent ${className}}`}
         ></div>
         <textarea
           {...props}

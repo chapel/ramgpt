@@ -61,7 +61,7 @@ export const Input = ({
       <div className="relative flex space-x-2 rounded-md bg-gray-200 px-3 py-2">
         <ExpandableTextArea
           placeholder="Write your message!"
-          className="w-full resize-none rounded-md bg-gray-200 text-gray-600 placeholder-gray-600 focus:placeholder-gray-400 focus:outline-none"
+          className="w-full resize-none rounded-md bg-gray-200 px-3 py-2 text-gray-600 placeholder-gray-600 focus:placeholder-gray-400 focus:outline-none"
           wrapperClassName="flex flex-1 items-center"
           value={message}
           rows={1}
