@@ -52,12 +52,14 @@ const isStoredSettings = (settings: unknown): settings is StoredBotSettings => {
 
 const getStoredSettings = (): BotSettingsProxy | undefined => {
   const settings = new BotSettingsContainer(proxyMap<string, BotSettings>());
-  const storedSettings = localStorage.getItem("bot-settings");
-  if (storedSettings) {
-    const parsedSettings: unknown = JSON.parse(storedSettings);
-    if (isStoredSettings(parsedSettings)) {
-      settings.selectedId = parsedSettings.selectedId;
-      settings.map = proxyMap<string, BotSettings>(parsedSettings.map);
+  if (typeof localStorage !== "undefined") {
+    const storedSettings = localStorage.getItem("bot-settings");
+    if (storedSettings) {
+      const parsedSettings: unknown = JSON.parse(storedSettings);
+      if (isStoredSettings(parsedSettings)) {
+        settings.selectedId = parsedSettings.selectedId;
+        settings.map = proxyMap<string, BotSettings>(parsedSettings.map);
+      }
     }
   }
   return settings;
