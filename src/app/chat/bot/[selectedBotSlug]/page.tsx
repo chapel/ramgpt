@@ -36,7 +36,12 @@ export default function Chat({
 
         setLoadingResult(true);
         const history = messages.map((message) => message.text);
-        const res = await simple(value, history, openaiState.apiKey);
+        const res = await simple(
+          value,
+          history,
+          openaiState.apiKey,
+          openaiState.model,
+        );
         setMessages((messages) => [
           ...messages,
           { type: MessageType.BOT_MESSAGE, text: res },

@@ -1,4 +1,4 @@
-import { proxy } from "valtio";
+import { proxy, subscribe } from "valtio";
 
 const GPT_4_TURBO = "gpt-4-1106-preview";
 const GPT_4 = "gpt-4";
@@ -15,8 +15,29 @@ export interface OpenaiSettings {
   model: string;
 }
 
-export const OPENAI_SETTINGS = proxy<OpenaiSettings>({
-  model: GPT_4_TURBO,
+const isStoredSettings = (settings: unknown): settings is OpenaiSettings => {
+  return (settings as OpenaiSettings).model !== undefined;
+};
+
+const getStoredSettings = (): OpenaiSettings | undefined => {
+  const settings: OpenaiSettings = { model: GPT_4_TURBO };
+  if (typeof localStorage !== "undefined") {
+    const storedSettings = localStorage.getItem("openai-settings");
+    if (storedSettings) {
+      const parsedSettings: unknown = JSON.parse(storedSettings);
+      if (isStoredSettings(parsedSettings)) {
+        settings.apiKey = parsedSettings.apiKey;
+        settings.model = parsedSettings.model;
+      }
+    }
+  }
+  return settings;
+};
+
+export const OPENAI_SETTINGS = proxy<OpenaiSettings>(getStoredSettings());
+
+subscribe(OPENAI_SETTINGS, () => {
+  localStorage.setItem("openai-settings", JSON.stringify(OPENAI_SETTINGS));
 });
 
 export const setApiKey = (apiKey: string) => {

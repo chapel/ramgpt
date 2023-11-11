@@ -1,8 +1,8 @@
-import { ChatOpenAI } from 'langchain/chat_models/openai'
-import { StringOutputParser } from 'langchain/schema/output_parser'
-import { PromptTemplate } from 'langchain/prompts'
+import { ChatOpenAI } from "langchain/chat_models/openai";
+import { PromptTemplate } from "langchain/prompts";
+import { StringOutputParser } from "langchain/schema/output_parser";
 
-import { env } from '../../env.mjs'
+import { env } from "../../env.mjs";
 
 const TEMPLATE = `
   You are a helpful bot that helps people with their problems.
@@ -14,7 +14,12 @@ const TEMPLATE = `
   AI:
 `;
 
-export async function simple(userPrompt: string, history: string[], openaiApiKey?: string) {
+export async function simple(
+  userPrompt: string,
+  history: string[],
+  openaiApiKey?: string,
+  modelName?: string,
+) {
   history ??= [];
 
   const prompt = PromptTemplate.fromTemplate(TEMPLATE);
@@ -22,6 +27,7 @@ export async function simple(userPrompt: string, history: string[], openaiApiKey
   const model = new ChatOpenAI({
     temperature: 0.8,
     openAIApiKey: openaiApiKey ?? env.NEXT_PUBLIC_OPENAI_API_KEY,
+    modelName,
   });
 
   const outputParser = new StringOutputParser();
@@ -29,7 +35,7 @@ export async function simple(userPrompt: string, history: string[], openaiApiKey
   const chain = prompt.pipe(model).pipe(outputParser);
 
   return chain.invoke({
-    chat_history: history.join('\n'),
-    input: userPrompt
+    chat_history: history.join("\n"),
+    input: userPrompt,
   });
 }

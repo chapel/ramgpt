@@ -58,10 +58,10 @@ export const Input = ({
 
   return (
     <div className="mb-2 border-t-2 border-gray-200 px-4 pt-4 text-sm sm:mb-0">
-      <div className="relative flex space-x-2 rounded-md bg-gray-200 px-3 py-2">
+      <div className="relative flex space-x-2 rounded-md bg-gray-200">
         <ExpandableTextArea
           placeholder="Write your message!"
-          className="w-full resize-none rounded-md bg-gray-200 px-3 py-2 text-gray-600 placeholder-gray-600 focus:placeholder-gray-400 focus:outline-none"
+          className="w-full resize-none rounded-md border-none bg-gray-200 px-3 py-2 text-gray-600 placeholder-gray-600 focus:border-none focus:placeholder-gray-400 focus:shadow-none focus:outline-none focus:ring-0"
           wrapperClassName="flex flex-1 items-center"
           value={message}
           rows={1}
@@ -69,11 +69,11 @@ export const Input = ({
           ref={ref}
           onValueChange={handleChange}
         ></ExpandableTextArea>
-        <div className="flex">
+        <div className="flex items-center justify-center">
           <button
             disabled={loadingResult}
             type="button"
-            className={`inline-flex h-6 w-16 items-center justify-end rounded-lg ${
+            className={`mr-2 inline-flex h-6 w-10 items-center justify-end rounded-lg ${
               message.length > 0 ? "text-blue-600" : "text-gray-400"
             } transition duration-500 ease-in-out focus:outline-none`}
             onClick={handleSubmit}
