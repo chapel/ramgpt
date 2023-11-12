@@ -69,8 +69,9 @@ export const Message = ({ message }: { message: MessageText }) => {
 };
 
 interface MessagesProps {
-  messages: MessageText[];
+  messages: readonly MessageText[];
 }
+
 export const Messages = ({ messages }: MessagesProps) => {
   return (
     <div className="mt-auto flex flex-1 flex-col justify-end space-y-4 p-3 text-sm">

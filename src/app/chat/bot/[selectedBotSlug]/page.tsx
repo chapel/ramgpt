@@ -1,6 +1,6 @@
 "use client";
 
-import { useAtom, useSetAtom } from "jotai";
+import { useSetAtom } from "jotai";
 import { notFound } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useSnapshot } from "valtio";
@@ -9,19 +9,17 @@ import { Messages } from "~/components/chat/messages";
 import { MessageType } from "~/components/chat/types";
 
 import { BOT_SETTINGS } from "../../settings/bots/[[...slug]]/bot-state";
-import { OPENAI_SETTINGS } from "../../settings/openai/openai-state";
-import { simple } from "../../simple";
-import { loadingResultAtom, messagesAtom } from "../../state";
+import { loadingResultAtom } from "../../state";
+import { CHAT_HISTORY, addMessage, memGPT } from "./memgpt";
 
 export default function Chat({
   params,
 }: {
   params: { selectedBotSlug: string };
 }) {
-  const [messages, setMessages] = useAtom(messagesAtom);
   const setLoadingResult = useSetAtom(loadingResultAtom);
   const botState = useSnapshot(BOT_SETTINGS);
-  const openaiState = useSnapshot(OPENAI_SETTINGS);
+  const chatHistory = useSnapshot(CHAT_HISTORY);
 
   const messagesContainerRef = useRef<HTMLDivElement>(null);
 
@@ -29,27 +27,14 @@ export default function Chat({
     async (value: string) => {
       value = value.trim();
       if (value) {
-        setMessages((messages) => [
-          ...messages,
-          { type: MessageType.USER_MESSAGE, text: value },
-        ]);
+        addMessage({ type: MessageType.USER_MESSAGE, text: value });
 
         setLoadingResult(true);
-        const history = messages.map((message) => message.text);
-        const res = await simple(
-          value,
-          history,
-          openaiState.apiKey,
-          openaiState.model,
-        );
-        setMessages((messages) => [
-          ...messages,
-          { type: MessageType.BOT_MESSAGE, text: res },
-        ]);
+        await memGPT.call(value);
         setLoadingResult(false);
       }
     },
-    [messages, setMessages, setLoadingResult, openaiState],
+    [setLoadingResult],
   );
 
   const isValidSelectedBot = useMemo(() => {
@@ -77,7 +62,7 @@ export default function Chat({
               className="max-w-screen flex flex-1 flex-col-reverse overflow-y-auto"
               ref={messagesContainerRef}
             >
-              <Messages messages={messages} />
+              <Messages messages={chatHistory.messages} />
             </div>
             <Input onMessageSubmit={handleMessageSubmit} />
           </div>

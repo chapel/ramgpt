@@ -15,7 +15,7 @@
     "@tailwindcss/forms": "^0.5.6",
     "human-id": "^4.1.0",
     "jotai": "^2.5.0",
-    "langchain": "^0.0.175",
+    "langchain": "^0.0.186",
     "next": "^14.0.1",
     "react": "18.3.0-canary-a17467e7e-20231102",
     "react-dom": "18.3.0-canary-a17467e7e-20231102",

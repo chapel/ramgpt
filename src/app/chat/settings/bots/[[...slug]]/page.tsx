@@ -6,6 +6,11 @@ import { useCallback, useEffect, useState } from "react";
 import { useFormState } from "react-dom";
 import { useSnapshot } from "valtio";
 import { Modal } from "~/components/modal";
+import {
+  humanPrompt,
+  profilePrompt,
+  systemPrompt,
+} from "~/gpt/memgpt/default-prompts";
 
 import { ArrowsPointingOutIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
@@ -291,7 +296,17 @@ export default function BotsSettings({ params }: { params: { slug: string } }) {
                 </button>
               </div>
             </div>
-            <Settings botSettings={{ id: "", name: "" }} />
+            <Settings
+              botSettings={{
+                id: "",
+                name: "",
+                systemPrompt: systemPrompt,
+                profilePrompt: profilePrompt(
+                  botState.selectedBot?.name ?? "Bot",
+                ),
+                humanPrompt: humanPrompt,
+              }}
+            />
           </div>
         </form>
       </main>
