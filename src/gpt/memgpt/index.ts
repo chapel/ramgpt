@@ -77,7 +77,13 @@ export class MemGPT extends OpenaiFunctional {
     aiPrompt: string,
     openaiApiKey: string,
   ) {
-    super(model, temperature, aiPrompt, [], openaiApiKey);
+    super({
+      model,
+      temperature,
+      aiPrompt,
+      functions: [],
+      openaiApiKey,
+    });
 
     this.setFunctions([
       createSendMessage(this.sendMessage),
@@ -92,6 +98,16 @@ export class MemGPT extends OpenaiFunctional {
       createArchivalMemoryInsert(this.archivalMemoryInsert),
       createArchivalMemorySearch(this.archivalMemorySearch),
     ]);
+
+    this.setOnIntermediateContent((content) => {
+      if (content && typeof content === "string") {
+        console.log("set intermediate thought");
+        addMessage({
+          type: MessageType.BOT_THOUGHT,
+          text: content,
+        });
+      }
+    });
   }
 
   processUserMessage(input: string) {
@@ -104,6 +120,7 @@ export class MemGPT extends OpenaiFunctional {
     this.history.push(new HumanMessage(message));
     this.history.push(new AIMessage({ content: res }));
     if (res) {
+      console.log("set return thought");
       addMessage({
         type: MessageType.BOT_THOUGHT,
         text: res,
@@ -113,6 +130,7 @@ export class MemGPT extends OpenaiFunctional {
   }
 
   sendMessage: SendMessageFunc = (input) => {
+    console.log("set message");
     addMessage({
       type: MessageType.BOT_MESSAGE,
       text: input.message,
