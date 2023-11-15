@@ -120,7 +120,7 @@ export class MemGPT extends OpenaiFunctional {
     this.history.push(new HumanMessage(message));
     this.history.push(new AIMessage({ content: res }));
     if (res) {
-      console.log("set return thought");
+      console.log("set return thought", res);
       addMessage({
         type: MessageType.BOT_THOUGHT,
         text: res,

@@ -79,9 +79,6 @@ export class OpenaiFunctional implements FunctionalInterface {
           return i.steps.flatMap(({ action, observation }) => {
             if ("messageLog" in action && action.messageLog !== undefined) {
               const log = action.messageLog as BaseMessage[];
-              if (log[0] && log[0].content.length > 0) {
-                this.onIntermediateContent?.(log[0].content);
-              }
               return log.concat(new FunctionMessage(observation, action.tool));
             } else {
               return [new AIMessage(action.log)] as BaseMessage[];
@@ -100,7 +97,16 @@ export class OpenaiFunctional implements FunctionalInterface {
       prompt,
       model,
       new OpenAIFunctionsAgentOutputParser(),
-    ]);
+    ]).pipe((input) => {
+      console.log("pipe", input);
+      if ("messageLog" in input && input.messageLog !== undefined) {
+        const log = input.messageLog as BaseMessage[];
+        if (log[0] && log[0].content.length > 0) {
+          this.onIntermediateContent?.(log[0].content);
+        }
+      }
+      return input;
+    });
 
     this.executor = AgentExecutor.fromAgentAndTools({
       agent,

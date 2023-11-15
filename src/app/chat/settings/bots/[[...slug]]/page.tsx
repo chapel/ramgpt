@@ -109,27 +109,27 @@ const Settings = ({ botSettings }: { botSettings: BotSettings }) => {
         </div>
       </div>
 
-      {/* Bot System Prompt */}
+      {/* Bot Human Prompt */}
       <div className="sm:col-span-4">
         <label
-          htmlFor="system-prompt"
+          htmlFor="human-prompt"
           className="block text-sm font-medium leading-6 text-gray-900"
         >
-          System Prompt
+          Human Profile Prompt
         </label>
         <div className="mt-2">
           <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
             <FullscreenTextarea
-              name="system-prompt"
-              id="system-prompt"
-              value={localSettings.systemPrompt ?? ""}
+              name="human-prompt"
+              id="human-prompt"
+              value={localSettings.humanPrompt ?? ""}
               onChange={(event) => {
                 setLocalSettings((settings) => ({
                   ...settings,
-                  systemPrompt: event.target.value,
+                  humanPrompt: event.target.value,
                 }));
               }}
-              placeholder="I am a helpful bot."
+              placeholder="I am a human."
             />
           </div>
         </div>
@@ -161,27 +161,27 @@ const Settings = ({ botSettings }: { botSettings: BotSettings }) => {
         </div>
       </div>
 
-      {/* Bot Human Prompt */}
+      {/* Bot System Prompt */}
       <div className="sm:col-span-4">
         <label
-          htmlFor="human-prompt"
+          htmlFor="system-prompt"
           className="block text-sm font-medium leading-6 text-gray-900"
         >
-          Human Profile Prompt
+          System Prompt
         </label>
         <div className="mt-2">
           <div className="flex rounded-md shadow-sm ring-1 ring-inset ring-gray-300 focus-within:ring-2 focus-within:ring-inset focus-within:ring-indigo-600 sm:max-w-md">
             <FullscreenTextarea
-              name="human-prompt"
-              id="human-prompt"
-              value={localSettings.humanPrompt ?? ""}
+              name="system-prompt"
+              id="system-prompt"
+              value={localSettings.systemPrompt ?? ""}
               onChange={(event) => {
                 setLocalSettings((settings) => ({
                   ...settings,
-                  humanPrompt: event.target.value,
+                  systemPrompt: event.target.value,
                 }));
               }}
-              placeholder="I am a human."
+              placeholder="I am a helpful bot."
             />
           </div>
         </div>
