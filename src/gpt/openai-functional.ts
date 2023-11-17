@@ -2,12 +2,7 @@ import { AgentExecutor } from "langchain/agents";
 import { OpenAIFunctionsAgentOutputParser } from "langchain/agents/openai/output_parser";
 import { ChatOpenAI } from "langchain/chat_models/openai";
 import { ChatPromptTemplate, MessagesPlaceholder } from "langchain/prompts";
-import type {
-  AgentStep,
-  BaseMessage,
-  BaseMessageLike,
-  MessageContent,
-} from "langchain/schema";
+import type { AgentStep, BaseMessage, BaseMessageLike } from "langchain/schema";
 import { AIMessage, FunctionMessage } from "langchain/schema";
 import { RunnableSequence } from "langchain/schema/runnable";
 import type { StructuredTool } from "langchain/tools";
@@ -27,16 +22,18 @@ interface OpenaiFunctionalInput {
   aiPrompt: string;
   functions: StructuredTool[];
   openaiApiKey?: string;
-  onIntermediateContent?: (content: MessageContent) => void;
+  onIntermediateContent?: (content: BaseMessage) => void;
 }
 
 export class OpenaiFunctional implements FunctionalInterface {
   model: string;
   temperature: number;
   functions: StructuredTool[];
-  aiPrompt = "";
   openaiApiKey? = "";
-  onIntermediateContent?: (content: MessageContent) => void;
+  onIntermediateContent?: (content: BaseMessage) => void;
+
+  internalAiPrompt = "";
+  aiPromptChanged = false;
 
   private executor?: AgentExecutor;
 
@@ -50,8 +47,17 @@ export class OpenaiFunctional implements FunctionalInterface {
     this.model = model;
     this.temperature = temperature;
     this.functions = functions;
-    this.aiPrompt = aiPrompt;
+    this.internalAiPrompt = aiPrompt;
     this.openaiApiKey = openaiApiKey;
+  }
+
+  get aiPrompt(): string {
+    return this.internalAiPrompt;
+  }
+
+  set aiPrompt(aiPrompt: string) {
+    this.internalAiPrompt = aiPrompt;
+    this.aiPromptChanged = true;
   }
 
   setupExecutor() {
@@ -65,6 +71,7 @@ export class OpenaiFunctional implements FunctionalInterface {
       ],
     });
 
+    this.aiPromptChanged = false;
     const prompt = ChatPromptTemplate.fromMessages([
       ["system", this.aiPrompt],
       new MessagesPlaceholder("chat_history"),
@@ -98,11 +105,10 @@ export class OpenaiFunctional implements FunctionalInterface {
       model,
       new OpenAIFunctionsAgentOutputParser(),
     ]).pipe((input) => {
-      console.log("pipe", input);
       if ("messageLog" in input && input.messageLog !== undefined) {
         const log = input.messageLog as BaseMessage[];
-        if (log[0] && log[0].content.length > 0) {
-          this.onIntermediateContent?.(log[0].content);
+        if (log[0]) {
+          this.onIntermediateContent?.(log[0]);
         }
       }
       return input;
@@ -115,7 +121,7 @@ export class OpenaiFunctional implements FunctionalInterface {
   }
 
   setOnIntermediateContent(
-    onIntermediateContent: (content: MessageContent) => void,
+    onIntermediateContent: (content: BaseMessage) => void,
   ) {
     this.onIntermediateContent = onIntermediateContent;
   }
@@ -149,7 +155,7 @@ export class OpenaiFunctional implements FunctionalInterface {
     input: string,
     chatHistory: BaseMessageLike[] = [],
   ): Promise<string> {
-    if (!this.executor) {
+    if (!this.executor || this.aiPromptChanged) {
       this.setupExecutor();
     }
 

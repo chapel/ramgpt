@@ -8,12 +8,10 @@ import { OPENAI_SETTINGS } from "../../settings/openai/openai-state";
 export const memGPT = new MemGPT(
   OPENAI_SETTINGS.model,
   0.8,
-  MemGPT.generateAiPrompt(
-    BOT_SETTINGS.selectedBot?.systemPrompt ?? "",
-    BOT_SETTINGS.selectedBot?.profilePrompt ?? "",
-    BOT_SETTINGS.selectedBot?.humanPrompt ?? "",
-  ),
   OPENAI_SETTINGS.apiKey ?? "",
+  BOT_SETTINGS.selectedBot?.systemPrompt ?? "",
+  BOT_SETTINGS.selectedBot?.profilePrompt ?? "",
+  BOT_SETTINGS.selectedBot?.humanPrompt ?? "",
 );
 
 subscribe(OPENAI_SETTINGS, () => {
@@ -23,12 +21,10 @@ subscribe(OPENAI_SETTINGS, () => {
 });
 
 subscribe(BOT_SETTINGS, () => {
-  memGPT.setAiPrompt(
-    MemGPT.generateAiPrompt(
-      BOT_SETTINGS.selectedBot?.systemPrompt ?? "",
-      BOT_SETTINGS.selectedBot?.profilePrompt ?? "",
-      BOT_SETTINGS.selectedBot?.humanPrompt ?? "",
-    ),
+  memGPT.setPrompts(
+    BOT_SETTINGS.selectedBot?.systemPrompt ?? "",
+    BOT_SETTINGS.selectedBot?.profilePrompt ?? "",
+    BOT_SETTINGS.selectedBot?.humanPrompt ?? "",
   );
 });
 

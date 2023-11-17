@@ -1,5 +1,7 @@
+import { OpenAIEmbeddings } from "langchain/embeddings/openai";
 import { AIMessage, FunctionMessage, HumanMessage } from "langchain/schema";
 import type { BaseMessageLike } from "langchain/schema";
+import { MemoryVectorStore } from "langchain/vectorstores/memory";
 import { addMessage } from "~/app/chat/bot/[selectedBotSlug]/memgpt";
 import { MessageType } from "~/components/chat/types";
 
@@ -30,6 +32,27 @@ import type {
   RecallMemorySearchFunc,
   SendMessageFunc,
 } from "./functions";
+
+const addBotMessage = (message: string) => {
+  addMessage({
+    type: MessageType.BOT_MESSAGE,
+    text: message,
+  });
+};
+
+const addBotThought = (thought: string) => {
+  addMessage({
+    type: MessageType.BOT_THOUGHT,
+    text: thought,
+  });
+};
+
+const addBotFunction = (funcName: string, args: string) => {
+  addMessage({
+    type: MessageType.BOT_FUNCTION,
+    text: `${funcName}(${args})`,
+  });
+};
 
 export class MemGPT extends OpenaiFunctional {
   static generateAiPrompt(
@@ -71,19 +94,36 @@ export class MemGPT extends OpenaiFunctional {
     ),
   ];
 
+  inflightHistory: BaseMessageLike[] = [];
+  hasCalledSendMessage = false;
+  retryLimit = 3;
+  retryCount = 0;
+  pauseHeartbeatsStart: Date | undefined;
+  pauseHeartbeatsMinutes: number | undefined;
+  maxPauseHeartbeatsMinutes = 60;
+  systemPrompt = "";
+  profilePrompt = "";
+  humanPrompt = "";
+
+  vectorStore?: MemoryVectorStore;
+
   constructor(
     model: string,
     temperature: number,
-    aiPrompt: string,
     openaiApiKey: string,
+    systemPrompt: string,
+    profilePrompt: string,
+    humanPrompt: string,
   ) {
     super({
       model,
       temperature,
-      aiPrompt,
+      aiPrompt: "",
       functions: [],
       openaiApiKey,
     });
+
+    this.setPrompts(systemPrompt, profilePrompt, humanPrompt);
 
     this.setFunctions([
       createSendMessage(this.sendMessage),
@@ -99,15 +139,32 @@ export class MemGPT extends OpenaiFunctional {
       createArchivalMemorySearch(this.archivalMemorySearch),
     ]);
 
-    this.setOnIntermediateContent((content) => {
-      if (content && typeof content === "string") {
-        console.log("set intermediate thought");
-        addMessage({
-          type: MessageType.BOT_THOUGHT,
-          text: content,
-        });
+    this.setOnIntermediateContent((message) => {
+      const content = message.content;
+      this.inflightHistory.push(message);
+      if (typeof content === "string" && content.length > 0) {
+        addBotThought(content);
       }
     });
+  }
+
+  setPrompts(
+    systemPrompt: string,
+    profilePrompt: string,
+    humanPrompt: string,
+  ): OpenaiFunctional {
+    this.systemPrompt = systemPrompt;
+    this.profilePrompt = profilePrompt;
+    this.humanPrompt = humanPrompt;
+    return this.setAiPrompt(
+      MemGPT.generateAiPrompt(systemPrompt, profilePrompt, humanPrompt),
+    );
+  }
+
+  setupVectorStore() {
+    this.vectorStore = new MemoryVectorStore(
+      new OpenAIEmbeddings({ openAIApiKey: this.openaiApiKey }),
+    );
   }
 
   processUserMessage(input: string) {
@@ -116,64 +173,118 @@ export class MemGPT extends OpenaiFunctional {
 
   async call(input: string): Promise<string> {
     const message = this.processUserMessage(input);
-    const res = await super.call(message, this.history.slice());
-    this.history.push(new HumanMessage(message));
-    this.history.push(new AIMessage({ content: res }));
-    if (res) {
-      console.log("set return thought", res);
-      addMessage({
-        type: MessageType.BOT_THOUGHT,
-        text: res,
-      });
+    this.inflightHistory.push(new HumanMessage(message));
+
+    let res: string;
+
+    try {
+      res = await super.call(message, this.history.slice());
+    } catch (e) {
+      console.log(e);
+      if (this.retryCount <= this.retryLimit) {
+        this.retryCount += 1;
+        this.inflightHistory = [];
+        return this.call(input);
+      }
+      return Promise.resolve("");
     }
+
+    if (!this.hasCalledSendMessage) {
+      console.log("needs to call send message");
+      if (this.retryCount <= this.retryLimit) {
+        this.retryCount += 1;
+        this.inflightHistory.push(new AIMessage({ content: res }));
+
+        if (res) {
+          addBotThought(res);
+        }
+        return this.call(input);
+      }
+    }
+
+    this.inflightHistory.push(new AIMessage({ content: res }));
+
+    if (res) {
+      addBotThought(res);
+    }
+
+    this.history = [...this.history, ...this.inflightHistory];
+    this.inflightHistory = [];
+    this.retryCount = 0;
     return res;
   }
 
-  sendMessage: SendMessageFunc = (input) => {
-    console.log("set message");
-    addMessage({
-      type: MessageType.BOT_MESSAGE,
-      text: input.message,
-    });
-    this.history.push(
-      new AIMessage({
-        content: "",
-        additional_kwargs: {
-          function_call: {
-            name: "send_message",
-            arguments: JSON.stringify({ message: input.message }),
-          },
-        },
-      }),
-    );
-    const response = JSON.stringify({ status: "OK", message: "" });
-    this.history.push(
+  respondAndAddHistory(name: string, content = ""): Promise<string> {
+    const response = JSON.stringify({ status: "OK", message: content });
+    this.inflightHistory.push(
       new FunctionMessage({
-        name: "send_message",
+        name,
         content: response,
       }),
     );
     return Promise.resolve(response);
+  }
+
+  sendMessage: SendMessageFunc = (input) => {
+    this.hasCalledSendMessage = true;
+    addBotMessage(input.message);
+    return this.respondAndAddHistory("send_message");
   };
 
   pauseHeartbeats: PauseHeartbeatsFunc = (input) => {
-    console.log("pauseHeartbeats", input);
-    return Promise.resolve("");
+    this.pauseHeartbeatsStart = new Date();
+    this.pauseHeartbeatsMinutes = Math.min(
+      input.minutes,
+      this.maxPauseHeartbeatsMinutes,
+    );
+    addBotFunction("pause_heartbeats", JSON.stringify(input));
+    return this.respondAndAddHistory(
+      "pause_heartbeats",
+      `Pausing timed heartbeats for ${this.pauseHeartbeatsMinutes} min`,
+    );
   };
 
   messageChatGPT: MessageChatGPTFunc = (input) => {
     console.log("messageChatGPT", input);
-    return Promise.resolve("");
+    return this.respondAndAddHistory("message_chat_gpt");
   };
 
-  coreMemoryAppend: CoreMemoryAppendFunc = (input) => {
-    console.log("coreMemoryAppend", input);
-    return Promise.resolve("");
+  // TODO - DRY this a little, handle max length for prompts
+  coreMemoryAppend: CoreMemoryAppendFunc = ({
+    name,
+    content,
+    request_heartbeat, // TODO - handle this
+  }) => {
+    if (name === "profile") {
+      this.profilePrompt += "\n" + content;
+    } else if (name === "human") {
+      this.humanPrompt += "\n" + content;
+    }
+    this.setPrompts(this.systemPrompt, this.profilePrompt, this.humanPrompt);
+    addBotFunction(
+      "core_memory_append",
+      JSON.stringify({ name, content, request_heartbeat }),
+    );
+    return this.respondAndAddHistory("core_memory_append");
   };
 
-  coreMemoryReplace: CoreMemoryReplaceFunc = (input) => {
-    console.log("coreMemoryReplace", input);
-    return Promise.resolve("");
+  coreMemoryReplace: CoreMemoryReplaceFunc = ({
+    name,
+    old_content,
+    new_content,
+    request_heartbeat, // TODO - handle this
+  }) => {
+    if (name === "profile") {
+      this.profilePrompt.replace(old_content, new_content);
+    } else if (name === "human") {
+      this.humanPrompt.replace(old_content, new_content);
+    }
+    this.setPrompts(this.systemPrompt, this.profilePrompt, this.humanPrompt);
+    addBotFunction(
+      "core_memory_replace",
+      JSON.stringify({ name, old_content, new_content, request_heartbeat }),
+    );
+    return this.respondAndAddHistory("core_memory_resplace");
   };
 
   recallMemorySearch: RecallMemorySearchFunc = (input) => {
@@ -196,13 +307,26 @@ export class MemGPT extends OpenaiFunctional {
     return Promise.resolve("");
   };
 
-  archivalMemoryInsert: ArchivalMemoryInsertFunc = (input) => {
-    console.log("archivalMemoryInsert", input);
-    return Promise.resolve("");
+  archivalMemoryInsert: ArchivalMemoryInsertFunc = async (input) => {
+    if (!this.vectorStore) {
+      this.setupVectorStore();
+    }
+    await this.vectorStore?.addDocuments([
+      { pageContent: input.content, metadata: {} },
+    ]);
+    addBotFunction("archival_memory_insert", JSON.stringify(input));
+    return this.respondAndAddHistory("archival_memory_insert");
   };
 
-  archivalMemorySearch: ArchivalMemorySearchFunc = (input) => {
-    console.log("archivalMemorySearch", input);
-    return Promise.resolve("");
+  archivalMemorySearch: ArchivalMemorySearchFunc = async (input) => {
+    if (!this.vectorStore) {
+      this.setupVectorStore();
+    }
+    const res = await this.vectorStore?.similaritySearch(input.query);
+    addBotFunction("archival_memory_search", JSON.stringify(input));
+    return this.respondAndAddHistory(
+      "archival_memory_search",
+      JSON.stringify(res?.map((r) => r.pageContent)),
+    );
   };
 }
